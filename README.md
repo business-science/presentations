@@ -1,2 +1,2 @@
 # presentations
-Business Science presentations
+A central repository of Business Science presentations
