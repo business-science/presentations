@@ -1,0 +1,212 @@
+---
+title: "Timetk Demo"
+author: "Matt Dancho"
+date: "September 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    echo = TRUE,
+    message = F,
+    warning = F)
+```
+
+# What's It Used For?
+
+1. Coercing (converting) between time classes in R (e.g. between `tbl`, `xts`, `zoo`, `ts`)
+
+2. Time series machine learning
+
+# Load Libraries
+
+```{r}
+# devtools::install_github("business-science/timetk")
+# devtools::install_github("business-science/tidyquant")
+library(timetk)     # Functions working with time series
+library(tidyquant)  # Loads tidyverse, financial pkgs, used to get data
+```
+
+# Data
+
+Get data using `tidyquant`. The data comes from FRED: [Beer, Wine, and Distilled Alcoholic Beverages Sales](https://fred.stlouisfed.org/series/S4248SM144NCEN).
+
+```{r}
+# Beer, Wine, Distilled Alcoholic Beverages, in Millions USD
+beer_sales_tbl <- tq_get("S4248SM144NCEN", get = "economic.data", from = "2010-01-01", to = "2016-12-31")
+
+beer_sales_tbl
+```
+
+Visualize the data... nothing new here.
+
+```{r}
+# Plot Beer Sales
+beer_sales_tbl %>%
+    ggplot(aes(date, price)) +
+    geom_line() +
+    theme_tq() +
+    labs(title = "Beer Sales")
+```
+
+
+
+# Part 1: Coercion
+
+* __Problem__: Switching between various time classes in R is painful and inconsistent. 
+
+* __Solution__: `tk_tbl`, `tk_xts`, `tk_zoo`, `tk_ts`
+
+### tk_xts
+
+Convert to `xts` using `tk_xts()`
+
+```{r}
+# xts
+beer_sales_xts <- tk_xts(beer_sales_tbl) 
+
+beer_sales_xts %>%
+    head()
+```
+
+Can go from `xts` back to `tbl`.
+
+```{r}
+tk_tbl(beer_sales_xts, rename_index = "date")
+```
+
+
+
+### tk_ts
+
+Convert to `ts` using `tk_ts()`.
+
+```{r}
+# ts
+beer_sales_ts <- tk_ts(beer_sales_tbl, start = 2010, freq = 12)
+
+beer_sales_ts
+```
+
+Can go back to `tbl`. Note that the date column is YEARMON class. 
+
+```{r}
+tk_tbl(beer_sales_ts, rename_index = "date")
+```
+
+Can go back to tibble and with `timetk_idx = TRUE` to __return original DATE or DATETIME information__.
+
+```{r}
+# Check for timetk index. 
+has_timetk_idx(beer_sales_ts)
+```
+
+```{r}
+# If timetk_idx is present, can get original dates back 
+tk_tbl(beer_sales_ts, timetk_idx = TRUE, rename_index = "date")
+```
+
+# Part 2: Time Series Machine Learning
+
+* __Key Insight__: The __time series signature__ - time stamp information expanded into a feature set - is used to perform machine learning.
+
+* __Objective__: We'll predict the next 12 months of data for the time series. 
+
+### Step 0: Review data
+
+```{r}
+# Starting point
+beer_sales_tbl
+```
+
+### Step 1: Augment Time Series Signature
+
+The `tk_augment_timeseries_signature()` function expands out the timestamp information into a machine learning feature set. Adds 28 columns of time series information. 
+
+```{r}
+# Augment (adds data frame columns)
+beer_sales_tbl_aug <- beer_sales_tbl %>%
+    tk_augment_timeseries_signature()
+
+beer_sales_tbl_aug
+```
+
+### Step 2: Model
+
+Apply any regression model to the data. We'll use `lm()`.
+
+```{r}
+# linear regression model used, but can use any model
+fit_lm <- lm(price ~ ., data = select(beer_sales_tbl_aug, -c(date, diff)))
+
+summary(fit_lm)
+```
+
+### Step 3: Build Future (New) Data
+
+Use `tk_index()` to extract the index. 
+
+```{r}
+# Retrieves the timestamp information
+beer_sales_idx <- beer_sales_tbl %>%
+    tk_index()
+
+head(beer_sales_idx)
+```
+
+Make a future index from the existing index.
+
+```{r}
+# Make future index
+future_idx <- beer_sales_idx %>%
+    tk_make_future_timeseries(n_future = 12)
+
+future_idx
+```
+
+
+From the future index, use `tk_get_timeseries_signature()` to turn index into time signature data frame.
+
+```{r}
+new_data_tbl <- future_idx %>%
+    tk_get_timeseries_signature()
+
+new_data_tbl
+```
+
+
+### Step 4: Predict the New Data
+
+Use the `predict()` function for your regression model. 
+
+```{r}
+# Make predictions
+pred <- predict(fit_lm, newdata = select(new_data_tbl, -c(index, diff)))
+
+predictions_tbl <- tibble(
+    date  = future_idx,
+    value = pred
+    )
+
+predictions_tbl
+```
+
+Visualize our forecast. 
+
+```{r}
+# Plot Beer Sales Forecast
+beer_sales_tbl %>%
+    ggplot(aes(x = date, y = price)) +
+    geom_line() +
+    geom_line(aes(y = value), color = "blue", data = predictions_tbl) +
+    theme_tq() +
+    labs(title = "Beer Sales Forecast")
+```
+
+
+
+# More Information
+
+* Check out our [GitHub Page](https://github.com/business-science/timetk)
+* Check out our [timetk documentation](https://business-science.github.io/timetk/)
+* Check out our [Business Science Insights Blog](http://www.business-science.io/blog/index.html)

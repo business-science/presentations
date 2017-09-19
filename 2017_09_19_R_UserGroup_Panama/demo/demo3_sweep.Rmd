@@ -1,0 +1,160 @@
+---
+title: "Sweep Demo"
+author: "Matt Dancho"
+date: "September 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    echo = TRUE,
+    message = F,
+    warning = F)
+```
+
+# What's It Used For?
+
+Tidying the `forecast` package workflow. Like `broom` is to `stats` library, `sweep` is to `forecast` package. 
+
+# Load Libraries
+
+```{r}
+# devtools::install_github("business-science/sweep")
+# devtools::install_github("business-science/timetk")
+# devtools::install_github("business-science/tidyquant")
+# install.packages("forecast")
+library(sweep)      # Broom-style tidiers for the forecast package
+library(timetk)     # Functions working with time series
+library(tidyquant)  # Loads tidyverse, financial pkgs, used to get data
+library(forecast)   # Forecasting models and predictions package
+```
+
+# Data
+
+Get data using `tidyquant`. The data comes from FRED: [Panama Canal Traffic](https://fred.stlouisfed.org/series/S4248SM144NCEN).
+
+```{r}
+# Beer, Wine, Distilled Alcoholic Beverages, in Millions USD
+panama_canal_tbl <- tq_get("M03028USM576NNBR", get = "economic.data", from = "1920-01-01", to = "1949-12-31")
+
+panama_canal_tbl
+```
+
+
+Visualize the data... nothing new here.
+
+```{r}
+# Plot Panama Canal Traffic
+panama_canal_tbl %>%
+    ggplot(aes(date, price)) +
+    geom_line() +
+    theme_tq() +
+    labs(title = "Panama Canal Traffic, Thousands of Tons")
+```
+
+# Forecasting using Forecast and Sweep
+
+__Key Insight__:
+
+Forecasting using the `forecast` package is a non-tidy process that involves `ts` class objects. We have seen this system before where we can "tidy" these objects. For the `stats` library, we have `broom`, which tidies models and predictions. For the `forecast` package we now have `sweep`, which tidies models and forecasts. 
+
+__Objective__: We'll work through an ARIMA analysis to forecast the next 24 months of time series data. 
+
+### Step 1: Create ts object
+
+Use `timetk::tk_ts()` to convert from `tbl` to `ts`.
+
+```{r}
+# Convert from tbl to ts
+panama_canal_ts <- tk_ts(panama_canal_tbl, start = 1920, freq = 12)
+
+panama_canal_ts
+```
+
+### Step 2A: Model using ARIMA
+
+We can use the `auto.arima()` function from the `forecast` package to model.
+
+```{r}
+# Model using auto.arima
+fit_arima <- auto.arima(panama_canal_ts)
+
+fit_arima
+```
+
+
+### Step 2B: Tidy the Model
+
+Like `broom` tidies the `stats` package, we can use `sweep` functions to tidy the ARIMA model. 
+
+```{r}
+# sw_tidy - Get model coefficients
+sw_tidy(fit_arima)
+```
+
+```{r}
+# sw_glance - Get model and accuracy measures
+sw_glance(fit_arima)
+```
+
+```{r}
+# sw_augment - get model residuals
+sw_augment(fit_arima, timetk_idx = TRUE)
+```
+
+Residual diagnostics.
+
+```{r}
+sw_augment(fit_arima, timetk_idx = TRUE) %>%
+    ggplot(aes(x = index, y = .resid)) +
+    geom_point() + 
+    geom_hline(yintercept = 0, color = "red") + 
+    labs(title = "Residual diagnostic") +
+    theme_tq()
+```
+
+
+
+### Step 3: Make a Forecast
+
+Make a forecast using the `forecast()` function. 
+
+```{r}
+# Forecast next 24 months
+fcast_arima <- forecast(fit_arima, h = 24)
+```
+
+Use `sw_sweep()` to tidy the forecast output. 
+
+```{r}
+# sw_sweep - tidies forecast output
+fcast_tbl <- fcast_arima %>%
+    sw_sweep(timetk_idx = TRUE)
+
+fcast_tbl
+```
+
+Visualize the forecast.
+
+```{r}
+# Visualize the forecast with ggplot
+fcast_tbl %>%
+    ggplot(aes(x = index, y = price, color = key)) +
+    geom_ribbon(aes(ymin = lo.95, ymax = hi.95), 
+                fill = "#D5DBFF", color = NA, size = 0) +
+    geom_ribbon(aes(ymin = lo.80, ymax = hi.80, fill = key), 
+                fill = "#596DD5", color = NA, size = 0, alpha = 0.8) +
+    geom_line() +
+    labs(title = "Panama Canal Traffic, ARIMA Forecast", x = "", y = "Thousands of Tons") +
+    scale_x_date(date_breaks = "5 year", date_labels = "%Y") +
+    scale_color_tq() +
+    scale_fill_tq() +
+    theme_tq()
+```
+
+
+# More Information
+
+* Check out our [GitHub Page](https://github.com/business-science/sweep)
+* Check out our [sweep vignettes](https://cran.r-project.org/web/packages/sweep/index.html)
+* Check out our [Business Science Insights Blog](http://www.business-science.io/blog/index.html)

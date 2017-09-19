@@ -1,0 +1,112 @@
+---
+title: "Tibbletime Demo"
+author: "Matt Dancho"
+date: "September 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    echo = TRUE,
+    message = F,
+    warning = F)
+```
+
+# What's It Used For?
+
+1. The future of "tidy" time series analysis. New class `tbl_time` rests on top of `tbl` and makes tibbles time awaqe.
+
+2. Can use a series of special tidy time series functions including `time_filter`, `time_summarize`, `as_period`, `time_collapse` and `tmap`. More coming!!!
+
+# Load Libraries
+
+```{r}
+# devtools::install_github("business-science/tibbletime")
+# devtools::install_github("business-science/tidyquant")
+library(tibbletime) # Future of tidy time series analysis
+library(tidyquant)  # Loads tidyverse, financial pkgs, used to get data
+```
+
+# Data
+
+```{r}
+# Stock Prices from Yahoo! Finance
+FANG_symbols <- c("FB", "AMZN", "NFLX", "GOOG")
+
+FANG_tbl_d <- FANG_symbols %>%
+    tq_get(get = "stock.prices", from = "2014-01-01", to = "2016-12-31") 
+
+FANG_tbl_d <- FANG_tbl_d %>%
+    group_by(symbol)
+
+FANG_tbl_d
+```
+
+
+Create a `tbl_time` object.
+
+```{r}
+# Convert to tbl_time
+FANG_tbl_time_d <- FANG_tbl_d %>%
+    as_tbl_time(index = date) 
+
+FANG_tbl_time_d
+```
+
+
+# Special Time Series Functions
+
+### time_filter
+
+Succinctly filter a `tbl_time` object by date.
+
+```{r}
+# time_filter by day
+FANG_tbl_time_d %>%
+    time_filter(2014-06-01 ~ 2014-06-05)
+```
+
+```{r}
+# time_filter by month
+FANG_tbl_time_d %>%
+    time_filter(2014-03 ~ 2014-12)
+```
+
+```{r}
+# time filter combinations
+FANG_tbl_time_d %>%
+    time_filter(2014 ~ 2015-01-05) 
+```
+
+### time_summarize
+
+Similar to `dplyr::summarise` but with the added benefit of being able to summarise by a time period such as "yearly" or "monthly"
+
+```{r}
+# Summarize functions over time periods such as weekly, monthly, etc
+FANG_tbl_time_d %>%
+    time_summarise(period = "yearly",
+        adj_min   = min(adjusted),
+        adj_max   = max(adjusted),
+        adj_range = adj_max - adj_min
+        )
+```
+
+### as_period
+
+Convert a `tbl_time` object from daily to monthly, from minute data to hourly, and more. This allows the user to easily aggregate data to a less granular level.
+
+```{r}
+# Convert from daily to yearly periodicity
+FANG_tbl_time_d %>%
+    as_period(period = "yearly")
+```
+
+# Warning!
+
+This package is currently under active development. Reproducible bug reports are welcome.
+
+# More Information
+
+* Check out our [GitHub Page](https://github.com/business-science/tibbletime)
+* Check out our [Business Science Insights Blog](http://www.business-science.io/blog/index.html)

@@ -1,0 +1,159 @@
+---
+title: "Tidyquant Demo"
+author: "Matt Dancho"
+date: "September 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    echo = TRUE,
+    message = F,
+    warning = F)
+```
+
+# What's It Used For?
+
+1. Getting web data from Yahoo! Finance, FRED Database, Quandl and more
+
+2. Tidy application of financial and time series functions from `xts`, `zoo`, `quantmod`, `TTR` and `PerformanceAnalytics`
+
+3. Graphing - Beautiful themes and financial geoms (e.g. `geom_ma`)
+
+4. Working with portfolios
+
+5. Financial performance analysis and portfolio attribution metrics
+
+6. Great base for financial and time series analysis - Loads `tidyverse` and time series / financial packages behind the scenes making it a great starting point for any analysis
+
+We'll go over first two in this tutorial. See documentation for other topics. 
+
+# Load Libraries
+
+```{r}
+# devtools::install_github("business-science/tidyquant")
+library(tidyquant) # Loads tidyverse, financial pkgs, used to get and manipulate data
+```
+
+# Getting data: tq_get
+
+Use `tq_get()` to get data from the web. There's a bunch of API's it connects to including Yahoo! Finance, FRED Economic Database, Quandl, and more!
+
+### Getting Stock Prices (Yahoo! Finance)
+
+Pass a vector of stock prices to `tq_get()`.
+
+```{r}
+# Stock Prices from Yahoo! Finance
+FANG_symbols <- c("FB", "AMZN", "NFLX", "GOOG")
+
+my_FANG_data_d <- FANG_symbols %>%
+    tq_get(get = "stock.prices", from = "2014-01-01", to = "2016-12-31")
+
+my_FANG_data_d
+```
+
+### Getting Economic Data (FRED)
+
+This example comes from __Deputy Chief Economist at Freddie Mac, Leonard Kieffer's__ recent article [A (TIDYQUANT)UM OF SOLACE](http://lenkiefer.com/2017/09/18/a-tidyquant-um-of-solace/)
+
+Pass a vector of FRED symbols to `tq_get()`.
+
+```{r}
+# Economic Data from the FRED
+FRED_symbols <- c('ETOTALUSQ176N',    # All housing units
+                  'EVACANTUSQ176N',   # Vacant
+                  'EYRVACUSQ176N',    # Year-round vacant
+                  'ERENTUSQ176N'      # Vacant for rent
+)
+
+my_FRED_data_m <- FRED_symbols %>%
+    tq_get(get="economic.data", from = "2001-04-01")
+
+my_FRED_data_m
+```
+
+# Mutating Data: tq_transmute and tq_mutate
+
+For applying `xts`, `zoo`, and `quantmod` functions in a "tidy" way. See below for [Available Functions](#available_functions). 
+
+
+### tq_transmute
+
+Returns a new data frame. Useful when __periodicity changes__ the number of rows in the data. 
+
+```{r}
+# Change periodicity from daily to monthly using to.period from xts
+my_FANG_data_m <- my_FANG_data_d %>%
+    group_by(symbol) %>%
+    tq_transmute(
+        select      = adjusted,
+        mutate_fun  = to.period,
+        period      = "months"
+    )
+
+my_FANG_data_m
+```
+
+Before transformation - Too much data.
+
+```{r}
+# Daily data
+my_FANG_data_d %>%
+    ggplot(aes(date, adjusted, color = symbol)) +
+    geom_point() +
+    geom_line() +
+    facet_wrap(~ symbol, ncol = 2, scales = "free_y") +
+    scale_color_tq() +
+    theme_tq()
+```
+
+After transformation - Easy to understand.
+
+```{r}
+# Monthly data
+my_FANG_data_m %>%
+    ggplot(aes(date, adjusted, color = symbol)) +
+    geom_point() +
+    geom_line() +
+    facet_wrap(~ symbol, ncol = 2, scales = "free_y") +
+    scale_color_tq() +
+    theme_tq()
+```
+
+
+
+### tq_mutate
+
+Returns the original data plus the mutated data.
+
+```{r}
+# Lags - Get first 5 lags
+column_names <- paste0("lag", 1:5)
+
+my_FANG_data_d %>%
+    select(symbol, date, adjusted) %>%
+    group_by(symbol) %>%
+    tq_mutate(
+        select     = adjusted,
+        mutate_fun = lag.xts,
+        k          = 1:5,
+        col_rename = column_names
+    )
+```
+
+### Available Functions {#available_functions}
+
+A bunch of functions that can be used!
+
+```{r}
+# Available functions
+# mutate_fun =
+tq_transmute_fun_options()
+```
+
+# More Information
+
+* Check out our [GitHub Page](https://github.com/business-science/tidyquant)
+* Check out our [tidyquant documentation](https://business-science.github.io/tidyquant/)
+* Check out our [Business Science Insights Blog](http://www.business-science.io/blog/index.html)
