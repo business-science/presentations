@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
     warning = F)
 ```
 
-# What's It Used For?
+# sweep: What's It Used For?
 
 Tidying the `forecast` package workflow. Like `broom` is to `stats` library, `sweep` is to `forecast` package. 
 

@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
     warning = F)
 ```
 
-# What's It Used For?
+# timetk: What's It Used For?
 
 1. Coercing (converting) between time classes in R (e.g. between `tbl`, `xts`, `zoo`, `ts`)
 

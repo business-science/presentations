@@ -12,7 +12,8 @@ knitr::opts_chunk$set(
     warning = F)
 ```
 
-# What's It Used For?
+
+# tidyquant: What's It Used For?
 
 1. Getting web data from Yahoo! Finance, FRED Database, Quandl and more
 

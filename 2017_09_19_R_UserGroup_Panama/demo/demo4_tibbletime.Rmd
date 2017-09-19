@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
     warning = F)
 ```
 
-# What's It Used For?
+# tibbletime: What's It Used For?
 
 1. The future of "tidy" time series analysis. New class `tbl_time` rests on top of `tbl` and makes tibbles time awaqe.
 
