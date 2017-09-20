@@ -151,7 +151,7 @@ Use `tk_index()` to extract the index.
 beer_sales_idx <- beer_sales_tbl %>%
     tk_index()
 
-head(beer_sales_idx)
+tail(beer_sales_idx)
 ```
 
 Make a future index from the existing index.
@@ -203,6 +203,9 @@ beer_sales_tbl %>%
     labs(title = "Beer Sales Forecast")
 ```
 
+```{r}
+
+```
 
 
 # More Information

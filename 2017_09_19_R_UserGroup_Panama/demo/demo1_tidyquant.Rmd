@@ -48,10 +48,10 @@ Pass a vector of stock prices to `tq_get()`.
 # Stock Prices from Yahoo! Finance
 FANG_symbols <- c("FB", "AMZN", "NFLX", "GOOG")
 
-my_FANG_data_d <- FANG_symbols %>%
+FANG_data_d <- FANG_symbols %>%
     tq_get(get = "stock.prices", from = "2014-01-01", to = "2016-12-31")
 
-my_FANG_data_d
+FANG_data_d
 ```
 
 ### Getting Economic Data (FRED)
@@ -68,10 +68,10 @@ FRED_symbols <- c('ETOTALUSQ176N',    # All housing units
                   'ERENTUSQ176N'      # Vacant for rent
 )
 
-my_FRED_data_m <- FRED_symbols %>%
+FRED_data_m <- FRED_symbols %>%
     tq_get(get="economic.data", from = "2001-04-01")
 
-my_FRED_data_m
+FRED_data_m
 ```
 
 # Mutating Data: tq_transmute and tq_mutate
@@ -85,7 +85,7 @@ Returns a new data frame. Useful when __periodicity changes__ the number of rows
 
 ```{r}
 # Change periodicity from daily to monthly using to.period from xts
-my_FANG_data_m <- my_FANG_data_d %>%
+FANG_data_m <- FANG_data_d %>%
     group_by(symbol) %>%
     tq_transmute(
         select      = adjusted,
@@ -93,14 +93,14 @@ my_FANG_data_m <- my_FANG_data_d %>%
         period      = "months"
     )
 
-my_FANG_data_m
+FANG_data_m
 ```
 
 Before transformation - Too much data.
 
 ```{r}
 # Daily data
-my_FANG_data_d %>%
+FANG_data_d %>%
     ggplot(aes(date, adjusted, color = symbol)) +
     geom_point() +
     geom_line() +
@@ -113,7 +113,7 @@ After transformation - Easy to understand.
 
 ```{r}
 # Monthly data
-my_FANG_data_m %>%
+FANG_data_m %>%
     ggplot(aes(date, adjusted, color = symbol)) +
     geom_point() +
     geom_line() +
@@ -132,7 +132,7 @@ Returns the original data plus the mutated data.
 # Lags - Get first 5 lags
 column_names <- paste0("lag", 1:5)
 
-my_FANG_data_d %>%
+FANG_data_d %>%
     select(symbol, date, adjusted) %>%
     group_by(symbol) %>%
     tq_mutate(
