@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 
 # tibbletime: What's It Used For?
 
-1. The future of "tidy" time series analysis. New class `tbl_time` rests on top of `tbl` and makes tibbles time awaqe.
+1. The future of "tidy" time series analysis. New class `tbl_time` rests on top of `tbl` and makes tibbles time aware.
 
 2. Can use a series of special tidy time series functions including `time_filter`, `time_summarize`, `as_period`, `time_collapse` and `tmap`. More coming!!!
 
