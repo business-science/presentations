@@ -1,0 +1,176 @@
+---
+title: "Airbnb data"
+author: "Davis Vaughan"
+date: "1/20/2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+http://tomslee.net/airbnb-data-collection-get-the-data
+
+
+```{r}
+library(tibbletime)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
+library(readr)
+```
+
+```{r}
+airbnb <- read_csv("data/tomslee_airbnb_san_diego_1436_2017-07-11.csv") %>%
+  as_tbl_time(last_modified) %>%
+  arrange(last_modified) %>%
+  select(last_modified, price, latitude, longitude)
+```
+
+# Slicing up your time series
+
+- 5th hour of 2017-07-12
+- Automatically coerced to the correct time zone and date object
+
+```{r}
+# All of 2017
+# Not important but allows me to explain it
+airbnb[~"2017"]
+
+airbnb %>%
+  filter(last_modified >= as.POSIXct("2017-07-12 02:00:00", tz = "UTC"), last_modified <= as.POSIXct("2017-07-12 02:59:59", tz = "UTC"))
+
+airbnb %>%
+  filter_time(~"2017-07-12 02")
+
+airbnb[~"2017-07-12 02"]
+
+# Start of 2nd hour to the end of the 3rd hour
+airbnb %>%
+  filter(last_modified >= as.POSIXct("2017-07-12 02:00:00", tz = "UTC"), last_modified < as.POSIXct("2017-07-12 03:59:59", tz = "UTC"))
+
+airbnb %>%
+  filter_time("2017-07-12 02" ~ "2017-07-12 03")
+```
+
+# A new way to group
+
+Also the "extra functionality"
+
+Showing different variations
+
+```{r}
+# First a simple collapse by 2 hour
+airbnb %>%
+  collapse_by(period = "1 sec")
+
+# What can you do with this?
+airbnb %>%
+  collapse_by(period = "2 hour") %>%
+  group_by(last_modified) %>%
+  summarise(median_price = median(price))
+
+# Clean up
+airbnb %>%
+  collapse_by(period = "2 hour", clean = TRUE) %>%
+  group_by(last_modified) %>%
+  summarise(median_price = median(price))
+
+# Start
+airbnb %>%
+  collapse_by(period = "2 hour", clean = TRUE, side = "start") %>%
+  group_by(last_modified) %>%
+  summarise(median_price = median(price))
+
+# This should go in the flexible section
+airbnb %>%
+  collapse_by(period = "2 hour", clean = TRUE, side = "start", start_date = "2017-07-11 15:00:00") %>%
+  group_by(last_modified) %>%
+  summarise(median_price = median(price))
+
+boundaries <- as.POSIXct(x = c("2017-07-11 00:00:00", "2017-07-11 20:00:00"), tz = "UTC")
+
+airbnb %>%
+  collapse_by(period = boundaries, clean = TRUE, side = "start") %>%
+  group_by(last_modified) %>%
+  summarise(median_price = median(price))
+```
+
+```{r}
+library(ggmap)
+library(gganimate)
+
+airbnb_plot <- airbnb %>%
+  
+  # Collapse and clean
+  collapse_by(period = "hour", clean = TRUE, side = "start") %>%
+  
+  # Throw out a few outliers
+  filter(between(price, quantile(price, .05), quantile(price, .95))) %>%
+  
+  # Map and animate
+  qmplot(longitude, latitude, data = ., geom = "blank") +
+  geom_point(aes(color = price, size = price, frame = last_modified), alpha = .5) +
+  scale_color_continuous(low = "red", high = "blue")
+
+animation::ani.options(ani.dev = "png", ani.type = "png", ani.width = 800, ani.height = 800, interval = 1.5)
+gganimate(airbnb_plot, "test-example.gif")
+
+```
+
+# Let's get things rolling
+
+Start off with an attention grabbing example. rollify()
+
+Also lets me start with a stock example, and get it out of the way then
+go back to airbnb which i will use for the rest of the time.
+
+- rollify() is an adverb like what purrr has
+
+```{r}
+data(FB)
+
+# Rolling averages
+
+short_term_mean <- rollify(mean, window = 5)
+long_term_mean  <- rollify(mean, window = 50)
+
+FB_roll <- FB %>%
+  mutate(short_mean = short_term_mean(adjusted),
+         long_mean  = long_term_mean(adjusted)) 
+
+FB_roll %>%
+  select(date, adjusted, short_mean, long_mean)
+
+FB_roll %>%
+  tidyr::gather(key = "Indicator", value = "value", short_mean, long_mean, adjusted) %>%
+  ggplot(aes(x = date, y = value, color = Indicator)) +
+  geom_line() +
+  labs(x = "Date", y = "Price", title = "FB Adjusted stock price with long/short term moving averages") +
+  theme_minimal()
+  
+# Rolling regressions - more complex and arbitrary functions
+
+lm_roll <- rollify(
+  .f     = ~ lm(.y ~ .x), 
+  window = 5, 
+  unlist = FALSE
+)
+
+
+FB_model <- FB %>%
+  mutate(
+    lag_volume = lag(volume),
+    model = lm_roll(lag_volume, adjusted)
+  ) 
+
+FB_model %>%
+  select(date, adjusted, volume, lag_volume, model)
+
+FB_model %>%
+  filter(!is.na(model)) %>%
+  mutate(glanced = map(model, broom::glance)) %>%
+  select(date, glanced) %>%
+  unnest()
+
+```
+
