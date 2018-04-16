@@ -1,0 +1,324 @@
+---
+title: "Rstudio::conf 2018 walkthrough"
+author: "Davis Vaughan"
+date: "1/25/2018"
+output: html_document
+---
+
+# Overview
+
+This guide accompanies Davis Vaughan's rstudio::conf 2018 talk, 
+"The future of time series and financial analysis in the tidyverse."
+
+# Required packages
+
+Unfortunately some of these packages are a bit finicky in what dependencies 
+they require.
+
+qqmap v2.6.1 (CRAN) requires ggplot2 v2.2.1 (CRAN) and will not work with the
+dev version of ggplot2.
+
+patchwork (Github only) requires and will automatically install the 
+development version of ggplot2.
+
+This causes problems if you want to run this code. I would advise running 
+everything 1 chunk at a time with the CRAN version of ggplot2 until you get
+down to the performance summary section. At that point, install patchwork with
+`devtools::install_github("thomasp85/patchwork")` and run the rest of the
+performance summary. 
+
+```{r, message=FALSE}
+# Business Science dev packages
+# devtools::install_github("business-science/tibbletime")
+# devtools::install_github("business-science/tidyquant2")
+library(tibbletime)
+library(tidyquant2)
+
+# General packages
+library(dplyr)
+library(readr)
+library(tidyr)
+
+# Used for themes and getting data
+library(tidyquant)
+
+# For the mapping example
+library(ggmap)
+library(gganimate)
+
+# For rolling linear models
+library(broom)
+```
+
+# Tidyquant example
+
+```{r}
+tq_get("AAPL") %>%
+  tq_mutate(select = adjusted, mutate_fun = dailyReturn) %>%
+  ggplot(aes(x = date, y = daily.returns)) +
+  geom_line() + 
+  theme_tq()
+```
+
+# Airbnb data
+
+```{r}
+airbnb <- read_csv("../data/tomslee_airbnb_san_diego_1436_2017-07-11.csv") %>%
+  as_tbl_time(last_modified) %>%
+  arrange(last_modified) %>%
+  select(last_modified, price, latitude, longitude)
+
+airbnb
+```
+
+# Slicing up your time series
+
+The dplyr way:
+
+```{r}
+airbnb %>%
+  filter(
+    last_modified >= as.POSIXct("2017-07-12 02:00:00", tz = "UTC"),     
+    last_modified <= as.POSIXct("2017-07-12 02:59:59", tz = "UTC")
+)
+```
+
+# tibbletime filter_time()
+
+```{r}
+airbnb %>%
+  filter_time("2017-07-12 02:00:00" ~ "2017-07-12 02:59:59")
+
+airbnb %>%
+  filter_time(~"2017-07-12 02")
+```
+
+More examples
+
+```{r}
+# Filter for all days in 2017
+airbnb %>%
+  filter_time(~"2017")
+
+# All days in July to the end of August
+airbnb %>%
+  filter_time("2017-07" ~ "2017-08")
+
+# Start through the end of December
+airbnb %>%
+  filter_time("start" ~ "2017-12")
+```
+
+# A new way to group
+
+```{r}
+collapse_by(airbnb, period = "1 day")
+
+collapse_by(airbnb, period = "1 day") %>% tail
+```
+
+Collapse and summarise
+
+```{r}
+# Collapse by 2 hour periods, summarise median price
+airbnb %>%
+  collapse_by(period = "2 hour") %>%
+  group_by(last_modified) %>%
+  summarise(median_price = median(price))
+
+# Clean and round up
+airbnb %>%
+  collapse_by(period = "2 hour", clean = TRUE) %>%
+  group_by(last_modified) %>%
+  summarise(median_price = median(price))
+
+# Clean and round down
+airbnb %>%
+  collapse_by(period = "2 hour", clean = TRUE, side = "start") %>%
+  group_by(last_modified) %>%
+  summarise(median_price = median(price))
+```
+
+# The possibilities are endless
+
+This works with ggmap v2.6.1 (CRAN) and ggplot2 v2.2.1 (CRAN). It is a bit 
+finicky with earlier version / dev versions of either package.
+
+```{r}
+airbnb_plot <- airbnb %>%
+  
+  # Collapse and clean
+  collapse_by(period = "hour", clean = TRUE) %>%
+  
+  # Throw out a few outliers
+  filter(
+    between(price, quantile(price, .05), quantile(price, .95))
+  ) %>%
+  
+  # Map and animate
+  qmplot(longitude, latitude, data = ., geom = "blank") +
+  geom_point(
+    aes(color = price, size = price, frame = last_modified), 
+    alpha = .5) +
+  scale_color_continuous(low = "red", high = "blue")
+
+gganimate(airbnb_plot)
+```
+
+# Let's get things rolling - rolling averages
+
+```{r}
+data(FB, package = "tibbletime")
+
+short_term_mean <- rollify(mean, window = 5)
+long_term_mean  <- rollify(mean, window = 50)
+
+FB_roll <- FB %>%
+  mutate(short_mean = short_term_mean(adjusted),
+         long_mean  = long_term_mean(adjusted)) 
+
+FB_roll %>%
+  select(date, adjusted, short_mean, long_mean)
+```
+
+Moving average plot
+
+```{r}
+FB_roll %>%
+  gather(key = "Indicator", value = "value", short_mean, long_mean, adjusted) %>%
+  ggplot(aes(x = date, y = value, color = Indicator)) +
+  geom_line() +
+  labs(x = "Date", y = "Price", title = "FB Adjusted stock price with long/short term moving averages") +
+  theme_minimal()
+```
+
+# Let's get things rolling - rolling linear models
+
+```{r}
+lm_roll <- rollify(
+  .f     = ~ lm(.y ~ .x), 
+  window = 5, unlist = FALSE)
+
+FB_model <- FB %>%
+  mutate(
+    lag_volume = lag(volume),
+    model = lm_roll(lag_volume, adjusted)
+  ) 
+
+FB_model
+```
+
+Looking at your model results with `broom`.
+
+```{r}
+FB_model %>%
+  filter(!is.na(model)) %>%
+  mutate(glanced = map(model, glance)) %>%
+  select(date, glanced) %>%
+  unnest()
+```
+
+# tidyfinance - FANG
+
+```{r}
+data(FANG, package = "tibbletime")
+
+FANG_time <- FANG %>%
+  group_by(symbol) %>% 
+  as_tbl_time(date)
+
+slice(FANG_time, 1:2)
+```
+
+```{r}
+FANG_return <- FANG_time %>%
+  select(symbol, date, adjusted) %>%
+  calculate_return(adjusted, period = "daily") %>%
+  mutate(drawdown = drawdown(adjusted_return),
+         cum_ret  = cumulative_return(adjusted_return))
+
+FANG_return
+```
+
+# tidyfinance + tibbletime
+
+```{r}
+FANG_return_monthly <- FANG_return %>%
+  collapse_by("month") %>%
+  group_by(symbol, date) %>%
+  summarise(monthly_return = total_return(adjusted_return))
+
+FANG_return_monthly
+```
+
+# Performance summary
+
+Cumulative returns
+
+```{r}
+plot_cum_ret <- FANG_return %>%
+  ggplot(aes(x = date, y = cum_ret, color = symbol)) +
+  geom_line() +
+  theme_tq() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x  = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(
+   y     = "Cumulative Return", 
+   title = "Performance summary: Facebook, Amazon, Netflix, Google") +
+  theme(legend.position="none") +
+  scale_color_tq()
+```
+
+Monthly returns
+
+```{r}
+plot_month_ret <- FANG_return_monthly %>%
+  ggplot(aes(x = date, y = monthly_return, fill = symbol)) +
+  geom_col(width = 15, position = position_dodge()) +
+  theme_tq() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x  = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(y = "Monthly Return") +
+  theme(legend.position="none") +
+  scale_fill_tq()
+```
+
+Drawdown
+
+```{r}
+plot_drawdown <- FANG_return %>%
+  ggplot(aes(x = date, y = drawdown, fill = symbol)) +
+  geom_area(position = position_identity(), alpha = .7) +
+  theme_tq() +
+  scale_x_date(
+    date_breaks = "3 months", 
+    date_labels = "%b %Y") +
+  labs(x = "", y = "Drawdown") +
+  scale_fill_tq()
+```
+
+# Performance summary with patchwork
+
+At this point you will need patchwork to run the following code, uncomment the
+lines below to first install patchwork from github. It should also install 
+the dev version of ggplot2. Then you will likely need to restart R and rerun 
+the code that involves creating the 3 FANG charts that will be added together 
+(everything _after_ the `tidyfinance - FANG` chunk along with loading
+the required packages at the beginning).
+Do not try and run the map code again, as it will not work now that you 
+have the dev version of ggplot2.
+
+```{r}
+# For performance summary plots
+devtools::install_github("thomasp85/patchwork", force = TRUE)
+library(patchwork)
+
+plot_cum_ret +
+  plot_month_ret +
+  plot_drawdown +
+  plot_layout(ncol = 1, heights = c(2, 1, 1))
+```
+
+

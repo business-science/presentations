@@ -1,0 +1,110 @@
+---
+title: "Untitled"
+author: "Davis Vaughan"
+date: "1/23/2018"
+output: html_document
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+library(tibbletime)
+library(tidyquant)
+library(tidyquant2)
+library(patchwork)
+```
+
+```{r}
+data(FANG)
+
+FANG <- FANG %>%
+  select(symbol, date, adjusted)
+
+FANG_time <- FANG %>%
+  group_by(symbol) %>%
+  as_tbl_time(date)
+
+
+FANG_return <- FANG_time %>%
+  calculate_return(adjusted, period = "daily") %>%
+  mutate(drawdown = drawdown(adjusted_return),
+         cum_ret  = cumulative_return(adjusted_return))
+
+FANG_return_monthly <- FANG_return %>%
+  collapse_by("month") %>%
+  group_by(symbol, date) %>%
+  summarise(monthly_return = total_return(adjusted_return))
+
+# Cum ret
+plot_cum_ret <- FANG_return %>%
+  ggplot(aes(x = date, y = cum_ret, color = symbol)) +
+  geom_line() +
+  theme_tq() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x  = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(y     = "Cumulative Return", 
+       title = "Performance summary: Facebook, Amazon, Netflix, Google") +
+  theme(legend.position="none") +
+  scale_color_tq()
+
+# Monthly Return
+# plot_month_ret <- FANG_return_monthly %>%
+#   ggplot(aes(x = date, y = monthly_return, fill = symbol)) +
+#   geom_col(width = 15, position = position_dodge()) +
+#   theme_tq() +
+#   theme(axis.title.x = element_blank(),
+#         axis.text.x  = element_blank(),
+#         axis.ticks.x = element_blank()) +
+#   labs(y = "Monthly Return") +
+#   theme(legend.position="none") +
+#   scale_fill_tq()
+
+plot_month_ret <- FANG_return %>%
+  calculate_return(adjusted, period = "monthly") %>%
+  rename(monthly_return = adjusted_return) %>%
+  ggplot(aes(x = date, y = monthly_return, fill = symbol)) +
+  geom_col(width = 15, position = position_dodge()) +
+  theme_tq() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x  = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(y = "Monthly Return") +
+  theme(legend.position="none") +
+  scale_fill_tq()
+
+# Drawdown
+plot_drawdown <- FANG_return %>%
+  ggplot(aes(x = date, y = drawdown, fill = symbol)) +
+  geom_area(position = position_identity(), alpha = .7) +
+  theme_tq() +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %Y") +
+  labs(x = "", y = "Drawdown") +
+  scale_fill_tq()
+
+# patchwork plots
+p <- plot_cum_ret + 
+  plot_month_ret + 
+  plot_drawdown + 
+  plot_layout(ncol = 1, heights = c(2, 1, 1))
+
+plot_cum_ret + 
+  plot_month_ret + 
+  plot_drawdown + 
+  plot_layout(ncol = 1, heights = c(2, 1, 1))
+
+
+#ggsave("example.png", p, width = 12, height = 7)
+
+```
+
+```{r}
+cmi_xts <- stocks %>%
+  filter(symbol == "CMI") %>%
+  xts(x = .$adjusted, order.by = .$date)
+
+yearlyReturn(cmi_xts)
+
+dailyReturn(cmi_xts)
+```
+
