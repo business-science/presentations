@@ -1,0 +1,10 @@
+---
+title: "Time Series Deep Learning"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This code accompanies the blog article, "Time Series Deep Learning: Forecasting Sunspots With Keras Stateful LSTM In R", that was presented at S&P Global's headquarters on April 19th, 2018.
