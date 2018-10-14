@@ -25,11 +25,13 @@ You’ll walk through an employee turnover problem.
 
 ## The Solution
 
-<img src="images/slide4.png" width="100%" align="right"> <br>
+<img src="images/slide4.png" width="100%" align="right">
+<br>
 
 ## Learning More
 
-<img src="images/slide5.png" width="50%" align="right">
+<a href="https://university.business-science.io/p/hr201-using-machine-learning-h2o-lime-to-predict-employee-turnover">
+<img src="images/slide5.png" width="50%" align="right"> <a>
 
 Take the course that’s transforming data scientists:
 
@@ -40,3 +42,6 @@ Take the course that’s transforming data scientists:
   - Learn `R` and `H2O`
 
   - Get results\!
+
+[**Join Data Science For Business With R
+Now\!**](https://university.business-science.io/p/hr201-using-machine-learning-h2o-lime-to-predict-employee-turnover)
