@@ -13,17 +13,17 @@ ___The path to Return-On-Investment with Data Science!___
 
 ## The Presentation
 
-<img src="images/slide1.png" height="150" align="right">
+<img src="images/slide1.png" width="50%" align="right">
 
 __Ever wonder how to connect data science with the business?__
 
-Then look no further. This presentation covers the essential project management framework that's designed to systematically generate ROI from data science.
+Then look no further. This presentation covers the essential project management framework that's designed to systematically ___generate ROI from data science.___
 
 ---
 
 ## The Agenda
 
-<img src="images/slide2.png" width="100%" align="right">
+<img src="images/slide2.png">
 
 
 ---
@@ -32,20 +32,22 @@ Then look no further. This presentation covers the essential project management 
 
 You'll walk through an employee turnover problem.
 
-<img src="images/slide3.png" width="100%" align="right">
-<br>
+<img src="images/slide3.png">
+
+
+---
 
 ## The Solution
 
 
-<img src="images/slide4.png" width="100%" align="right">
+<img src="images/slide4.png">
 
 ---
 
 ## Learning More
 
 <a href="https://university.business-science.io/p/hr201-using-machine-learning-h2o-lime-to-predict-employee-turnover">
-<img src="images/slide5.png" width="150" align="right">
+<img src="images/slide5.png" width="50%" align="right">
 <a>
 
 Take the course that's transforming data scientists:
