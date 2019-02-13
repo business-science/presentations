@@ -12,7 +12,13 @@ knitr::opts_chunk$set(
 ```
 # excel_to_r
 
-This repo includes the `code`, [slide deck](/Excel_To_R.pdf), and presentation materials for Business Science Learning Lab #3: Marketing Analytics - Taking You Business Process from Excel to R and the Correlation Funnel. 
+This repo includes the:
+
+- `code`
+- [Slide Deck](https://github.com/business-science/presentations/blob/master/2019_02_13_Learning_Lab_Marketing_Analytics/Excel_To_R.pdf)
+- [Report](https://github.com/business-science/presentations/blob/master/2019_02_13_Learning_Lab_Marketing_Analytics/marketing_analysis_report.pdf)
+
+and other presentation materials for __Business Science Learning Lab #3: Marketing Analytics - Taking You Business Process from Excel to R and the Correlation Funnel__. 
 
 ```{r}
 knitr::include_graphics("Excel_to_R_thumb.jpg")
