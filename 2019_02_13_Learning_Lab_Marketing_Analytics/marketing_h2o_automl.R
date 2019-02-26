@@ -2,6 +2,10 @@
 # EPISODE 4
 # MARKETING ANALYTICS: SCALABLE AUTOMATIC MACHINE LEARNING WITH H2O
 
+# Setup instructions: 
+# - Please update to the latest version of h2o using install.packages("h2o") 
+#   to access the latest functionality and performance features
+
 
 # Libraries
 library(tidyverse)
@@ -29,15 +33,18 @@ data_joined_tbl
 
 
 # 4.2 H2O AutoML Training ----
+h2o.init()
 
 # The training set
 train <- as.h2o(data_joined_tbl)
+
+y <- "TERM_DEPOSIT"
 train[,y] <- as.factor(train[,y])  #perform classification
+
+x <- setdiff(names(train), c(y, "ID"))
 
 
 # Execute an AutoML run for 10 models
-y <- "TERM_DEPOSIT"
-x <- setdiff(names(train), c(y, "ID"))
 aml <- h2o.automl(y = y, x = x, training_frame = train,
                   project_name = "term_deposit",
                   max_models = 10,
