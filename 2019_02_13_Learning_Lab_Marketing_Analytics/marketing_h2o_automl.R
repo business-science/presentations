@@ -14,7 +14,7 @@ library(h2o)
 
 
 # 1.0 READ EXCEL SHEETS ----
-path   <- "data/bank_term_deposit_marketing_analysis.xlsx"
+path   <- "2019_02_13_Learning_Lab_Marketing_Analytics/data/bank_term_deposit_marketing_analysis.xlsx"
 sheets <- excel_sheets(path)
 
 
@@ -40,7 +40,7 @@ h2o.init()
 
 # Convert string columns to factor (aka "enum") type
 data_joined_tbl <- data_joined_tbl %>% 
-    mutate_if(is.character, list(~factor(.)))
+    mutate_if(is.character, as.factor)
 
 # The training set (convert to an H2OFrame)
 # If you have large data, set this option for a speed-up: options("h2o.use.data.table" = TRUE)
@@ -64,10 +64,13 @@ x <- setdiff(names(train), c(y, "ID"))
 # 4.2 H2O AutoML Training ----
 
 # Execute an AutoML run for 10 models
-aml <- h2o.automl(y = y, x = x, training_frame = train,
-                  project_name = "term_deposit",
-                  max_models = 10,
-                  seed = 1)
+aml <- h2o.automl(
+    y = y, 
+    x = x, 
+    training_frame = train,
+    project_name = "term_deposit",
+    max_models = 10,
+    seed = 1)
 
 
 # 4.3 H2O AutoML Leaderboard ----
