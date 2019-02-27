@@ -32,17 +32,36 @@ data_joined_tbl <- sheets[4:7] %>%
 data_joined_tbl 
 
 
-# 4.2 H2O AutoML Training ----
+# 4.0 START H2O CLUSTER ----
 h2o.init()
 
-# The training set
+
+# 4.1 H2O DATA PREP ----
+
+# Convert string columns to factor (aka "enum") type
+data_joined_tbl <- data_joined_tbl %>% 
+    mutate_if(is.character, list(~factor(.)))
+
+# The training set (convert to an H2OFrame)
+# If you have large data, set this option for a speed-up: options("h2o.use.data.table" = TRUE)
 train <- as.h2o(data_joined_tbl)
 
-y <- "TERM_DEPOSIT"
-train[,y] <- as.factor(train[,y])  #perform classification
+# Take a look at the training set
+h2o.describe(train)
 
+# Identify the response column
+y <- "TERM_DEPOSIT"
+
+# If our binary response column was encoded as 0/1 then we would have to convert it to a factor
+# in order to tell H2O to perform classification (instead of regression).  Since our response
+# is already a factor/enum type, there's nothing to do, but in the 0/1 case you just do:
+#train[,y] <- as.factor(train[,y])
+
+# Identify the predictor columns (remove response and ID column)
 x <- setdiff(names(train), c(y, "ID"))
 
+
+# 4.2 H2O AutoML Training ----
 
 # Execute an AutoML run for 10 models
 aml <- h2o.automl(y = y, x = x, training_frame = train,
@@ -62,7 +81,6 @@ aml <- h2o.automl(y = y, x = x, training_frame = train,
 
 # The leader model is stored at `aml@leader` and the leaderboard is stored at `aml@leaderboard`.
 lb <- aml@leaderboard
-
 
 # Now we will view a snapshot of the top models.  Here we should see the two Stacked Ensembles 
 # at or near the top of the leaderboard.  Stacked Ensembles can almost always outperform a single model.
@@ -96,7 +114,6 @@ h2o.varimp(metalearner)
 h2o.varimp_plot(metalearner)
 
 
-
 # 4.5 Variable Importance ----
 
 # Now let's look at the variable importance on the training set using the top XGBoost model
@@ -108,4 +125,5 @@ h2o.varimp(xgb)
 
 # We can also plot the base learner contributions to the ensemble.
 h2o.varimp_plot(xgb)
+
 
