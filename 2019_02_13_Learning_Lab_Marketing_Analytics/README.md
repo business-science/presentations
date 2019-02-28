@@ -1,9 +1,11 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Learning Lab \#3: Marketing Analytics
+# Learning Labs \#3 & \#4 - Marketing Analytics, Corr Funnel, H2O Automatic Machine Learning 
 
-This repo includes the:
+## Learning Lab \#3: Marketing Analytics
+
+Key Files:
 
   - [Excel
     Data](https://github.com/business-science/presentations/tree/master/2019_02_13_Learning_Lab_Marketing_Analytics/data)
@@ -25,3 +27,8 @@ knitr::include_graphics("Excel_to_R_thumb.jpg")
 ```
 
 ![](Excel_to_R_thumb.jpg)<!-- -->
+
+## Learning Lab \#4 - H2O Automatic Machine Learning
+
+Key Files:
+
