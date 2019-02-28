@@ -5,6 +5,8 @@
 
 ## Learning Lab \#3: Marketing Analytics
 
+[Watch on YouTube](https://youtu.be/VSjU_4XoMAM)
+
 Key Files:
 
   - [Excel
@@ -26,6 +28,8 @@ and the Correlation Funnel**.
 ![](Excel_to_R_thumb.jpg)<!-- -->
 
 ## Learning Lab \#4 - H2O Automatic Machine Learning
+
+[Watch on YouTube](https://youtu.be/7Cusb3B8jcM)
 
 Key Files:
 
