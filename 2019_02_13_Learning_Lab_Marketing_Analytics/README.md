@@ -32,3 +32,8 @@ knitr::include_graphics("Excel_to_R_thumb.jpg")
 
 Key Files:
 
+  - [Excel Data](https://github.com/business-science/presentations/tree/master/2019_02_13_Learning_Lab_Marketing_Analytics/data)
+  - [`R` Code (H2O AutoML)](https://github.com/business-science/presentations/blob/master/2019_02_13_Learning_Lab_Marketing_Analytics/marketing_h2o_automl.R)
+  - [Slide Deck (H2O)](https://github.com/business-science/presentations/blob/master/2019_02_13_Learning_Lab_Marketing_Analytics/h2o_automl_bizsci_feb2019.pdf)
+  
+![](h2o_thumb.jpg)
