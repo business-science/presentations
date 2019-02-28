@@ -22,9 +22,6 @@ and other presentation materials for **Business Science Learning Lab
 \#3: Marketing Analytics - Taking You Business Process from Excel to R
 and the Correlation Funnel**.
 
-``` r
-knitr::include_graphics("Excel_to_R_thumb.jpg")
-```
 
 ![](Excel_to_R_thumb.jpg)<!-- -->
 
