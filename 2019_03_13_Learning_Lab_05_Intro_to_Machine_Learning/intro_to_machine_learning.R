@@ -35,13 +35,17 @@ price_vs_weight_tbl <- read_csv("2019_03_13_Learning_Lab_05_Intro_to_Machine_Lea
 
 price_vs_weight_tbl
 
-plot_price_vs_weight()
+
 
 # Engineered Features from Model Description
 # - Feature Engineering: 101, Week 3 - Feature Engineering 
 engineered_features_tbl <- read_csv("2019_03_13_Learning_Lab_05_Intro_to_Machine_Learning/data/engineered_features.csv")
 
 engineered_features_tbl
+
+# Visualization
+
+plot_price_vs_weight()
 
 # Join data, and remove Product Families with low counts
 # - Data Manipulation: 101, Week 2 - Data Manipulation
@@ -69,7 +73,9 @@ test_tbl  <- split_obj %>% testing()
 # - Cross Validation & Grid Search: Data Science for Business with R (201), Week 5 - H2O AutoML
 
 # 4.1 Linear Regression (No Engineered Features) ----
-?linear_reg
+?linear_reg     # Step 1: Pick a parsnip algorithm, & Set key parameters
+?set_engine     # Step 2: Set an engine, Returns a model spec
+?fit.model_spec # Step 3: Fit model specification to data
 
 # Specify Model, Set Engine, & Fit Model to Data
 model_01_lm <- linear_reg("regression") %>%
