@@ -1,0 +1,66 @@
+row_id,Price_num,Category,ProductFamily,Model,Weight_lb
+1,10500,Road,Endurance Road,Synapse Hi-Mod Disc Dura-Ace Di2,15.9
+2,8400,Road,Endurance Road,Synapse Hi-Mod Disc Red eTap,16.8
+3,6850,Road,Endurance Road,Synapse Hi-Mod Disc Dura-Ace,16.6
+4,6300,Road,Endurance Road,Synapse Carbon Disc Red eTap,17.4
+5,5250,Road,Endurance Road,Synapse Carbon Disc Dura-Ace,17.1
+6,4400,Road,Endurance Road,Synapse Carbon Disc Ultegra Di2,18.5
+7,3675,Road,Endurance Road,Synapse Carbon Disc Ultegra SE,18.2
+8,3150,Road,Endurance Road,Synapse Carbon Disc Ultegra,18.6
+9,2850,Road,Endurance Road,Synapse Carbon Disc 105 SE,20.3
+10,2625,Road,Endurance Road,Synapse Carbon Disc 105,20.7
+11,2100,Road,Endurance Road,Synapse Carbon 105,18.9
+12,1680,Road,Endurance Road,Synapse Disc 105 SE,20.8
+13,1575,Road,Endurance Road,Synapse Disc 105,21.8
+14,1365,Road,Endurance Road,Synapse Disc Tiagra,22.7
+15,11500,Road,Elite Road,SystemSix Hi-MOD Dura-Ace Di2,16.8
+16,7900,Road,Elite Road,SystemSix Hi-MOD Ultegra Di2,17.2
+17,6300,Road,Elite Road,SystemSix Carbon Dura-Ace,17.1
+18,4200,Road,Elite Road,SystemSix Carbon Ultegra,17.7
+19,8900,Road,Elite Road,SuperSix EVO Hi-Mod Dura-Ace Di2,14.7
+20,6300,Road,Elite Road,SuperSix EVO Carbon Red eTap,15.5
+21,4850,Road,Elite Road,SuperSix EVO Carbon Dura-Ace,15.7
+22,3675,Road,Elite Road,SuperSix EVO Carbon Ultegra Race,16.1
+23,3150,Road,Elite Road,SuperSix EVO Carbon Disc Ultegra,17.7
+24,2750,Road,Elite Road,SuperSix EVO Carbon Ultegra,17.4
+25,1900,Road,Elite Road,SuperSix EVO 105,17.5
+26,3675,Road,Elite Road,CAAD12 Dura-Ace,16.4
+27,2200,Road,Elite Road,CAAD12 Ultegra,17
+28,2050,Road,Elite Road,CAAD12 Disc 105,19.9
+29,1575,Road,Elite Road,CAAD12 105,18.2
+30,1320,Road,Elite Road,CAAD Optimo 105,19.6
+31,1100,Road,Elite Road,CAAD Optimo Tiagra,20.9
+32,1000,Road,Elite Road,CAAD Optimo Sora,21
+33,850,Road,Elite Road,CAAD Optimo Claris,21.8
+34,3675,Road,Gravel - All Road,Slate SE Force 1,21.8
+35,3050,Road,Gravel - All Road,Slate SE Apex 1,22.7
+36,3675,Road,Gravel - All Road,Synapse Carbon Disc Ultegra SE,18.2
+37,2850,Road,Gravel - All Road,Synapse Carbon Disc 105 SE,20.3
+38,1680,Road,Gravel - All Road,Synapse Disc 105 SE,20.8
+39,4100,Road,Gravel - All Road,SuperX SE Force 1,18.7
+40,3150,Road,Gravel - All Road,SuperX SE Apex 1,20.4
+41,1420,Road,Gravel - All Road,CAADX Tiagra SE,22
+42,5250,Road,Cyclocross,SuperX Di2,17.8
+43,4100,Road,Cyclocross,SuperX SE Force 1,18.7
+44,3800,Road,Cyclocross,SuperX Ultegra,19.3
+45,3150,Road,Cyclocross,SuperX SE Apex 1,20.4
+46,2150,Road,Cyclocross,CAADX Ultegra,20.9
+47,1680,Road,Cyclocross,CAADX 105 SE,21.3
+48,1420,Road,Cyclocross,CAADX Tiagra SE,22
+49,10500,Road,TT and TRI,SuperSlice Red eTap,19
+50,6850,Road,TT and TRI,SuperSlice Ultegra,19
+51,10500,Mountain,Cross Country,Scalpel-Si Hi-Mod World Cup,21.6
+52,7900,Mountain,Cross Country,Scalpel-Si Hi-Mod 1,22.4
+53,7150,Mountain,Cross Country,Scalpel-Si Carbon 2,24
+54,5775,Mountain,Cross Country,Scalpel-Si Carbon 3,25.3
+55,4725,Mountain,Cross Country,Scalpel-Si Carbon SE,28.3
+56,4400,Mountain,Cross Country,Scalpel-Si Carbon 4,25.5
+57,3150,Mountain,Cross Country,Scalpel-Si 5,27.9
+58,9500,Mountain,Cross Country,F-Si Hi-MOD World Cup,18.5
+59,7350,Mountain,Cross Country,F-Si Hi-MOD 1,19.4
+60,5250,Mountain,Cross Country,F-Si Carbon 2,21.1
+61,3675,Mountain,Cross Country,F-Si Carbon 3,22.3
+62,3150,Mountain,Cross Country,F-Si Carbon 4,23.8
+63,3150,Mountain,Cross Country,F-Si Carbon Women's 2,23.5
+64,2300,Mountain,Cross Country,F-Si Carbon 5,23.8
+65,4725,Mountain,Trail,Scalpel-Si Carbon SE,28.3
